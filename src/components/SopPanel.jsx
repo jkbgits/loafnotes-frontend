@@ -29,6 +29,7 @@ import {
   ExpandLess as ExpandLessIcon,
   Edit as EditIcon,
   Save as SaveIcon,
+  Close as CloseIcon,
 } from "@mui/icons-material";
 import { apiGet, apiPost } from "../utils/api";
 
@@ -43,6 +44,7 @@ const SopPanel = () => {
     sop: null,
   });
   const [expandedSuggestions, setExpandedSuggestions] = useState({});
+  const [dismissedSuggestions, setDismissedSuggestions] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedContent, setEditedContent] = useState("");
@@ -186,15 +188,23 @@ This procedure applies to all team members involved in ${
     setEditMode(!editMode);
   };
 
-  // Get notes that don't have SOPs yet
+  // Get notes that don't have SOPs yet and aren't dismissed
   const notesWithoutSOPs = notes.filter(
-    (note) => !sops.some((sop) => sop.id === note.id)
+    (note) =>
+      !sops.some((sop) => sop.id === note.id) && !dismissedSuggestions[note.id]
   );
 
   const toggleExpanded = (noteId) => {
     setExpandedSuggestions((prev) => ({
       ...prev,
       [noteId]: !prev[noteId],
+    }));
+  };
+
+  const dismissSuggestion = (noteId) => {
+    setDismissedSuggestions((prev) => ({
+      ...prev,
+      [noteId]: true,
     }));
   };
 
@@ -245,11 +255,39 @@ This procedure applies to all team members involved in ${
                   key={note.id}
                   sx={{
                     mb: 2,
-                    border: "1px solid",
-                    borderColor: "primary.light",
+                    position: "relative",
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    backdropFilter: "blur(15px)",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    boxShadow: "none",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.15)",
+                      transform: "none",
+                    },
                   }}
                 >
-                  <CardContent sx={{ pb: 1 }}>
+                  {/* Dismiss Button */}
+                  <IconButton
+                    size="small"
+                    onClick={() => dismissSuggestion(note.id)}
+                    sx={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      zIndex: 1,
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      color: "rgba(255, 255, 255, 0.7)",
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 0.2)",
+                        color: "#ffffff",
+                      },
+                    }}
+                    aria-label="dismiss suggestion"
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+
+                  <CardContent sx={{ pb: 1, pr: 5 }}>
                     <Box display="flex" alignItems="center" gap={1} mb={1}>
                       <MagicIcon color="primary" fontSize="small" />
                       <Typography
@@ -289,8 +327,9 @@ This procedure applies to all team members involved in ${
                         sx={{
                           mt: 1,
                           p: 2,
-                          bgcolor: "grey.50",
+                          backgroundColor: "rgba(255, 255, 255, 0.08)",
                           borderRadius: 1,
+                          border: "1px solid rgba(255, 255, 255, 0.1)",
                         }}
                       >
                         {note.content.substring(0, 200)}...
