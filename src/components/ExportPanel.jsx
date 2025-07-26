@@ -12,9 +12,10 @@ import {
   Alert,
 } from "@mui/material";
 import { Download as DownloadIcon } from "@mui/icons-material";
-import { apiGet } from "../utils/api";
+import { useData } from "../context/DataContext";
 
 const ExportPanel = () => {
+  const { notes, sops } = useData();
   const [exportFormat, setExportFormat] = useState("json");
   const [exportType, setExportType] = useState("all");
   const [snackbar, setSnackbar] = useState({
@@ -25,24 +26,21 @@ const ExportPanel = () => {
 
   const handleExport = async () => {
     try {
-      let endpoint = "";
-      let filename = "";
+      let data, filename;
 
       switch (exportType) {
         case "all":
-          endpoint = "/notes";
+          data = notes;
           filename = `meeting-notes-${new Date().toISOString().split("T")[0]}`;
           break;
         case "sops":
-          endpoint = "/sops";
+          data = sops;
           filename = `sop-drafts-${new Date().toISOString().split("T")[0]}`;
           break;
         default:
-          endpoint = "/notes";
+          data = notes;
           filename = "export";
       }
-
-      const data = await apiGet(endpoint);
 
       let content = "";
       let mimeType = "";

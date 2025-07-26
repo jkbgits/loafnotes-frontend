@@ -19,69 +19,25 @@ const getApiBaseUrl = () => {
  * @throws {Error} Throws error with descriptive message if request fails
  */
 export const fetchFromApi = async (path, options = {}) => {
-  // Ensure path starts with forward slash
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-
-  // Construct full URL
   const baseUrl = getApiBaseUrl();
   const url = `${baseUrl}${normalizedPath}`;
 
-  // Default options
-  const defaultOptions = {
+  const fetchOptions = {
     headers: {
       "Content-Type": "application/json",
       ...options.headers,
     },
-  };
-
-  // Merge options
-  const fetchOptions = {
-    ...defaultOptions,
     ...options,
   };
 
-  try {
-    console.log(`🌐 API Request: ${fetchOptions.method || "GET"} ${url}`);
+  const response = await fetch(url, fetchOptions);
 
-    const response = await fetch(url, fetchOptions);
-
-    // Check if response is ok
-    if (!response.ok) {
-      // Try to get error message from response body
-      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-
-      try {
-        const errorData = await response.json();
-        if (errorData.detail) {
-          errorMessage = errorData.detail;
-        } else if (errorData.message) {
-          errorMessage = errorData.message;
-        }
-      } catch (parseError) {
-        // If we can't parse the error response, use the status text
-        console.warn("Could not parse error response:", parseError);
-      }
-
-      throw new Error(errorMessage);
-    }
-
-    // Parse JSON response
-    const data = await response.json();
-    console.log(`✅ API Response: ${url}`, data);
-
-    return data;
-  } catch (error) {
-    // Network or other errors
-    if (error.name === "TypeError" && error.message.includes("fetch")) {
-      throw new Error(
-        `Network error: Unable to connect to API at ${baseUrl}. Please check if the server is running.`
-      );
-    }
-
-    // Re-throw other errors with context
-    console.error(`❌ API Error: ${url}`, error);
-    throw error;
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
   }
+
+  return response.json();
 };
 
 /**

@@ -31,12 +31,11 @@ import {
   Save as SaveIcon,
   Close as CloseIcon,
 } from "@mui/icons-material";
-import { apiGet, apiPost } from "../utils/api";
+import { useData } from "../context/DataContext";
+import { apiPost } from "../utils/api";
 
 const SopPanel = () => {
-  const [sops, setSops] = useState([]);
-  const [notes, setNotes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { notes, sops, loading, refreshData } = useData();
   const [generating, setGenerating] = useState({});
   const [previewing, setPreviewing] = useState({});
   const [previewDialog, setPreviewDialog] = useState({
@@ -49,32 +48,11 @@ const SopPanel = () => {
   const [editedTitle, setEditedTitle] = useState("");
   const [editedContent, setEditedContent] = useState("");
 
-  const loadData = async () => {
-    try {
-      const [sopsData, notesData] = await Promise.all([
-        apiGet("/sops"),
-        apiGet("/notes"),
-      ]);
-
-      setSops(sopsData);
-      setNotes(notesData);
-    } catch (err) {
-      console.error("Failed to load data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const generateSOPPreview = async (noteId) => {
     setPreviewing((prev) => ({ ...prev, [noteId]: true }));
 
     try {
       const note = notes.find((n) => n.id === noteId);
-      // Simulate SOP generation for preview
       const mockSopData = {
         note_id: noteId,
         title: note.title,
@@ -86,7 +64,7 @@ const SopPanel = () => {
 ## Purpose
 Based on the meeting discussion, this SOP provides clear steps to handle similar situations.
 
-## Scope
+## Scope  
 This procedure applies to all team members involved in ${
           note.title.split("–")[2]?.trim() || "this process"
         }.
@@ -112,7 +90,6 @@ This procedure applies to all team members involved in ${
       };
 
       setPreviewDialog({ open: true, sop: mockSopData });
-      // Initialize edit fields
       setEditedTitle(mockSopData.title);
       setEditedContent(mockSopData.sop_draft);
       setEditMode(false);
@@ -127,19 +104,14 @@ This procedure applies to all team members involved in ${
     setGenerating((prev) => ({ ...prev, [sopData.note_id]: true }));
 
     try {
-      // Use edited content if in edit mode
       const finalSopData = {
         ...sopData,
         title: editedTitle,
         sop_draft: editedContent,
       };
 
-      const response = await apiPost(
-        `/generate-sop/${sopData.note_id}`,
-        finalSopData
-      );
-
-      await loadData();
+      await apiPost(`/generate-sop/${sopData.note_id}`, finalSopData);
+      refreshData();
       setPreviewDialog({ open: false, sop: null });
     } catch (err) {
       console.error("Failed to approve SOP:", err);

@@ -5,111 +5,114 @@ import NotesList from "./components/NotesList";
 import SearchBar from "./components/SearchBar";
 import ExportPanel from "./components/ExportPanel";
 import SopPanel from "./components/SopPanel";
+import { DataProvider } from "./context/DataContext";
 import { apiPost } from "./utils/api";
 
 const App = () => {
   const handleNoteSubmit = async (note) => {
     try {
-      const data = await apiPost("/notes", note);
-      console.log("Note ingested:", data);
+      await apiPost("/notes", note);
+      // Data will be refreshed by the components using the context
     } catch (err) {
       console.error("Failed to ingest note:", err);
     }
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #12dee6 0%, #764ba2 100%)",
-        position: "relative",
-        py: 4,
-      }}
-    >
-      {/* Dark overlay for better contrast */}
+    <DataProvider>
       <Box
         sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "rgba(0, 0, 0, 0.4)",
-          zIndex: 0,
-        }}
-      />
-      <Container
-        maxWidth="xl"
-        sx={{
-          px: { xs: 2, sm: 3, md: 4 },
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #12dee6 0%, #764ba2 100%)",
           position: "relative",
-          zIndex: 1,
+          py: 4,
         }}
       >
-        {/* Header */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: { xs: 3, md: 4 },
-            mb: 4,
-            textAlign: "center",
-          }}
-        >
-          <Typography variant="h4" gutterBottom>
-            Notes
-          </Typography>
-          <Typography variant="body1" sx={{ opacity: 0.9 }}>
-            AI-powered note organization and SOP generation.
-          </Typography>
-        </Paper>
-
-        {/* Upload Note Row */}
-        <Box sx={{ mb: 3 }}>
-          <NoteUpload onSubmit={handleNoteSubmit} />
-        </Box>
-
-        {/* Search and Export Row */}
+        {/* Dark overlay for better contrast */}
         <Box
           sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr",
-              lg: "1fr 1fr",
-            },
-            gap: 3,
-            mb: 3,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0, 0, 0, 0.4)",
+            zIndex: 0,
           }}
-        >
-          <Box>
-            <SearchBar />
-          </Box>
-          <Box>
-            <ExportPanel />
-          </Box>
-        </Box>
-
-        {/* Notes and SOP Row */}
-        <Box
+        />
+        <Container
+          maxWidth="xl"
           sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr",
-              lg: "1fr 1fr",
-            },
-            gap: 3,
-            alignItems: "start",
-            minHeight: "60vh",
+            px: { xs: 2, sm: 3, md: 4 },
+            position: "relative",
+            zIndex: 1,
           }}
         >
-          <Box sx={{ height: "60vh", overflow: "hidden" }}>
-            <NotesList />
+          {/* Header */}
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 3, md: 4 },
+              mb: 4,
+              textAlign: "center",
+            }}
+          >
+            <Typography variant="h4" gutterBottom>
+              Notes
+            </Typography>
+            <Typography variant="body1" sx={{ opacity: 0.9 }}>
+              AI-powered note organization and SOP generation.
+            </Typography>
+          </Paper>
+
+          {/* Upload Note Row */}
+          <Box sx={{ mb: 3 }}>
+            <NoteUpload onSubmit={handleNoteSubmit} />
           </Box>
-          <Box sx={{ height: "60vh", overflow: "hidden" }}>
-            <SopPanel />
+
+          {/* Search and Export Row */}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                lg: "1fr 1fr",
+              },
+              gap: 3,
+              mb: 3,
+            }}
+          >
+            <Box>
+              <SearchBar />
+            </Box>
+            <Box>
+              <ExportPanel />
+            </Box>
           </Box>
-        </Box>
-      </Container>
-    </Box>
+
+          {/* Notes and SOP Row */}
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                lg: "1fr 1fr",
+              },
+              gap: 3,
+              alignItems: "start",
+              minHeight: "60vh",
+            }}
+          >
+            <Box sx={{ height: "60vh", overflow: "hidden" }}>
+              <NotesList />
+            </Box>
+            <Box sx={{ height: "60vh", overflow: "hidden" }}>
+              <SopPanel />
+            </Box>
+          </Box>
+        </Container>
+      </Box>
+    </DataProvider>
   );
 };
 

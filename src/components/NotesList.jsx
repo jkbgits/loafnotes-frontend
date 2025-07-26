@@ -14,12 +14,11 @@ import {
   MenuItem,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { apiGet } from "../utils/api";
+import { useData } from "../context/DataContext";
 
 const NotesList = () => {
-  const [notes, setNotes] = useState([]);
+  const { notes, loading } = useData();
   const [filteredNotes, setFilteredNotes] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [filterTopic, setFilterTopic] = useState("");
   const [filterDate, setFilterDate] = useState("");
 
@@ -47,17 +46,8 @@ const NotesList = () => {
   };
 
   useEffect(() => {
-    apiGet("/notes")
-      .then((data) => {
-        setNotes(data);
-        setFilteredNotes(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Failed to load notes:", err);
-        setLoading(false);
-      });
-  }, []);
+    setFilteredNotes(notes);
+  }, [notes]);
 
   // Filter notes when filters change
   useEffect(() => {
