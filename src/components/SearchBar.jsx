@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { Search as SearchIcon } from "@mui/icons-material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { apiGet } from "../utils/api";
 
 const SearchBar = () => {
   const [query, setQuery] = useState("");
@@ -25,10 +26,7 @@ const SearchBar = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(
-        `http://localhost:8000/search?query=${encodeURIComponent(query)}`
-      );
-      const data = await res.json();
+      const data = await apiGet(`/search?query=${encodeURIComponent(query)}`);
       setResults(data);
       setHasSearched(true);
     } catch (err) {

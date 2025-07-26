@@ -30,6 +30,7 @@ import {
   Edit as EditIcon,
   Save as SaveIcon,
 } from "@mui/icons-material";
+import { apiGet, apiPost } from "../utils/api";
 
 const SopPanel = () => {
   const [sops, setSops] = useState([]);
@@ -48,14 +49,9 @@ const SopPanel = () => {
 
   const loadData = async () => {
     try {
-      const [sopsRes, notesRes] = await Promise.all([
-        fetch("http://localhost:8000/sops"),
-        fetch("http://localhost:8000/notes"),
-      ]);
-
       const [sopsData, notesData] = await Promise.all([
-        sopsRes.json(),
-        notesRes.json(),
+        apiGet("/sops"),
+        apiGet("/notes"),
       ]);
 
       setSops(sopsData);
@@ -136,21 +132,13 @@ This procedure applies to all team members involved in ${
         sop_draft: editedContent,
       };
 
-      const res = await fetch(
-        `http://localhost:8000/generate-sop/${sopData.note_id}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(finalSopData),
-        }
+      const response = await apiPost(
+        `/generate-sop/${sopData.note_id}`,
+        finalSopData
       );
 
-      if (res.ok) {
-        await loadData();
-        setPreviewDialog({ open: false, sop: null });
-      } else {
-        console.error("Failed to approve SOP");
-      }
+      await loadData();
+      setPreviewDialog({ open: false, sop: null });
     } catch (err) {
       console.error("Failed to approve SOP:", err);
     } finally {

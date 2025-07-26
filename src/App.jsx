@@ -5,16 +5,12 @@ import NotesList from "./components/NotesList";
 import SearchBar from "./components/SearchBar";
 import ExportPanel from "./components/ExportPanel";
 import SopPanel from "./components/SopPanel";
+import { apiPost } from "./utils/api";
 
 const App = () => {
   const handleNoteSubmit = async (note) => {
     try {
-      const res = await fetch("http://localhost:8000/notes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(note),
-      });
-      const data = await res.json();
+      const data = await apiPost("/notes", note);
       console.log("Note ingested:", data);
     } catch (err) {
       console.error("Failed to ingest note:", err);

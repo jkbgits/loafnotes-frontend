@@ -14,6 +14,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { apiGet } from "../utils/api";
 
 const NotesList = () => {
   const [notes, setNotes] = useState([]);
@@ -46,8 +47,7 @@ const NotesList = () => {
   };
 
   useEffect(() => {
-    fetch("http://localhost:8000/notes")
-      .then((res) => res.json())
+    apiGet("/notes")
       .then((data) => {
         setNotes(data);
         setFilteredNotes(data);
