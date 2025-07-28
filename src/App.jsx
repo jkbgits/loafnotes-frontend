@@ -76,11 +76,9 @@ const App = () => {
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
-                sm: "1fr",
-                md: "1fr 1fr",
                 lg: "1fr 1fr",
               },
-              gap: { xs: 2, sm: 3 },
+              gap: 3,
               mb: 3,
             }}
           >
@@ -98,30 +96,17 @@ const App = () => {
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
-                sm: "1fr",
-                md: "1fr",
                 lg: "1fr 1fr",
               },
-              gap: { xs: 2, sm: 3 },
+              gap: 3,
               alignItems: "start",
-              minHeight: { xs: "auto", lg: "60vh" },
+              minHeight: "60vh",
             }}
           >
-            <Box
-              sx={{
-                height: { xs: "50vh", lg: "60vh" },
-                overflow: "hidden",
-                mb: { xs: 3, lg: 0 },
-              }}
-            >
+            <Box sx={{ height: "60vh", overflow: "hidden" }}>
               <NotesList />
             </Box>
-            <Box
-              sx={{
-                height: { xs: "50vh", lg: "60vh" },
-                overflow: "hidden",
-              }}
-            >
+            <Box sx={{ height: "60vh", overflow: "hidden" }}>
               <SopPanel />
             </Box>
           </Box>

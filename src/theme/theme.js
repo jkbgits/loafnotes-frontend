@@ -1,15 +1,6 @@
 import { createTheme } from "@mui/material/styles";
 
 const theme = createTheme({
-  breakpoints: {
-    values: {
-      xs: 0,
-      sm: 600,
-      md: 900,
-      lg: 1200,
-      xl: 1536,
-    },
-  },
   palette: {
     mode: "light",
     primary: {
@@ -33,26 +24,15 @@ const theme = createTheme({
       fontWeight: 700,
       letterSpacing: "-0.02em",
       color: "#ffffff",
-      fontSize: "2rem",
-      "@media (max-width:600px)": {
-        fontSize: "1.5rem",
-      },
     },
     h6: {
       fontWeight: 600,
       letterSpacing: "-0.01em",
       color: "#ffffff",
-      fontSize: "1.25rem",
-      "@media (max-width:600px)": {
-        fontSize: "1.1rem",
-      },
     },
     subtitle1: {
       color: "#ffffff",
       fontWeight: 600,
-      "@media (max-width:600px)": {
-        fontSize: "0.9rem",
-      },
     },
   },
   shape: {

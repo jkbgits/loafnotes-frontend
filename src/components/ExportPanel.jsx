@@ -52,7 +52,7 @@ const ExportPanel = () => {
       } else if (exportFormat === "csv") {
         // Convert to CSV
         if (data.length === 0) {
-          content = "No data to export";
+          content = "arecareNo data to export";
         } else {
           const headers = Object.keys(data[0]).join(",");
           const rows = data.map((item) =>

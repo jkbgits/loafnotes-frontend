@@ -12,15 +12,67 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Button,
+  CircularProgress,
+  Alert,
+  Snackbar,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import { useData } from "../context/DataContext";
+import { apiPost } from "../utils/api";
 
 const NotesList = () => {
-  const { notes, loading } = useData();
+  const { notes, loading, refreshData, sops } = useData();
   const [filteredNotes, setFilteredNotes] = useState([]);
   const [filterTopic, setFilterTopic] = useState("");
   const [filterDate, setFilterDate] = useState("");
+  const [generatingSOPs, setGeneratingSOPs] = useState(new Set());
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  // Check if a note has an existing SOP
+  const hasExistingSOP = (noteId) => {
+    return sops.some((sop) => sop.id === noteId && sop.sop_draft);
+  };
+
+  // Handle SOP regeneration
+  const handleRegenerateSOP = async (noteId, noteTitle) => {
+    try {
+      setGeneratingSOPs((prev) => new Set(prev).add(noteId));
+
+      const response = await apiPost(`/generate-sop/${noteId}`);
+
+      setSnackbar({
+        open: true,
+        message: `SOP regenerated successfully for "${noteTitle}"`,
+        severity: "success",
+      });
+
+      // Refresh data to update the SOP panel
+      refreshData();
+    } catch (error) {
+      console.error("Failed to regenerate SOP:", error);
+      setSnackbar({
+        open: true,
+        message: `Failed to regenerate SOP: ${error.message}`,
+        severity: "error",
+      });
+    } finally {
+      setGeneratingSOPs((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(noteId);
+        return newSet;
+      });
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
   // Extract unique topics from note titles
   const getTopics = (notesList) => {
@@ -139,9 +191,26 @@ const NotesList = () => {
           filteredNotes.map((note) => (
             <Accordion key={note.id} sx={{ mb: 1 }}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography fontWeight="bold" sx={{ flex: 1 }}>
-                  {note.title}
-                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    flex: 1,
+                    gap: 1,
+                  }}
+                >
+                  <Typography fontWeight="bold" sx={{ flex: 1 }}>
+                    {note.title}
+                  </Typography>
+                  {hasExistingSOP(note.id) && (
+                    <Chip
+                      label="Has SOP"
+                      size="small"
+                      color="success"
+                      sx={{ fontSize: "0.7rem" }}
+                    />
+                  )}
+                </Box>
               </AccordionSummary>
               <AccordionDetails>
                 <Typography
@@ -150,15 +219,67 @@ const NotesList = () => {
                     whiteSpace: "pre-wrap",
                     lineHeight: 1.6,
                     color: "text.secondary",
+                    mb: 2,
                   }}
                 >
                   {note.content}
                 </Typography>
+
+                {/* Regenerate SOP Button */}
+                <Box
+                  sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}
+                >
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={
+                      generatingSOPs.has(note.id) ? (
+                        <CircularProgress size={16} color="inherit" />
+                      ) : (
+                        <RefreshIcon />
+                      )
+                    }
+                    onClick={() => handleRegenerateSOP(note.id, note.title)}
+                    disabled={generatingSOPs.has(note.id)}
+                    sx={{
+                      background: hasExistingSOP(note.id)
+                        ? "linear-gradient(45deg, #ff9800 30%, #f57c00 90%)"
+                        : "linear-gradient(45deg, #12dee6 30%, #764ba2 90%)",
+                      "&:hover": {
+                        background: hasExistingSOP(note.id)
+                          ? "linear-gradient(45deg, #e65100 30%, #ef6c00 90%)"
+                          : "linear-gradient(45deg, #0fa8af 30%, #5a3a7a 90%)",
+                      },
+                    }}
+                  >
+                    {generatingSOPs.has(note.id)
+                      ? "Generating..."
+                      : hasExistingSOP(note.id)
+                      ? "Regenerate SOP"
+                      : "Generate SOP"}
+                  </Button>
+                </Box>
               </AccordionDetails>
             </Accordion>
           ))
         )}
       </Box>
+
+      {/* Snackbar for feedback */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Paper>
   );
 };
